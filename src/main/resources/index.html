@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank Account Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        input, button {
+            padding: 8px;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+<h1>Bank Account Viewer</h1>
+
+<div>
+    <h2>Get All Accounts</h2>
+    <button onclick="fetchAllAccounts()">Load All Accounts</button>
+    <div id="allAccounts"></div>
+</div>
+
+<div>
+    <h2>Search by Account Number</h2>
+    <input type="text" id="accountNumber" placeholder="Enter account number">
+    <button onclick="fetchAccountByNumber()">Search</button>
+    <div id="accountResult"></div>
+</div>
+
+<script>
+    const API_BASE_URL = "http://localhost:8080/api/accounts"; // Change if your backend is on a different URL
+
+    // Fetch all accounts
+    async function fetchAllAccounts() {
+        try {
+            const response = await fetch(`${API_BASE_URL}`);
+            const accounts = await response.json();
+            displayAccounts(accounts, "allAccounts");
+        } catch (error) {
+            console.error("Error fetching accounts:", error);
+            document.getElementById("allAccounts").innerHTML = "Failed to load accounts.";
+        }
+    }
+
+    // Fetch account by number
+    async function fetchAccountByNumber() {
+        const accountNumber = document.getElementById("accountNumber").value;
+        if (!accountNumber) {
+            alert("Please enter an account number!");
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/${accountNumber}`);
+            const accounts = await response.json();
+            displayAccounts(accounts, "accountResult");
+        } catch (error) {
+            console.error("Error fetching account:", error);
+            document.getElementById("accountResult").innerHTML = "Account not found.";
+        }
+    }
+
+    // Display accounts in a table
+    function displayAccounts(accounts, elementId) {
+        const container = document.getElementById(elementId);
+        if (!accounts || accounts.length === 0) {
+            container.innerHTML = "No accounts found.";
+            return;
+        }
+
+        let html = `<table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Account Number</th>
+                        <th>Balance</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+
+        accounts.forEach(account => {
+            html += `
+                    <tr>
+                        <td>${account.id}</td>
+                        <td>${account.accountNumber}</td>
+                        <td>$${account.balance.toFixed(2)}</td>
+                    </tr>`;
+        });
+
+        html += `</tbody></table>`;
+        container.innerHTML = html;
+    }
+</script>
+</body>
+</html>
